@@ -1,0 +1,35 @@
+This methodology based on the fact that 
+1.	For total RNA-seq library, there are both mRNA and microRNAs in the library.
+2.	The average length of pre-microRNAs is 80nts.
+3.	K-mer means a sequence with length of K nts. When K=17, P17mer = (1/4)^17≈5.8e-11, total human genome is about 3e10, which means that in random, a specific sequence with 17 nts will not present 2 times in human genome. 
+4.	In the whole transcription, microRNAs occupied 0.02% ~0.1%
+5.	When identifying sequences with k-mer, 3 same kmer sequences will decrease the remaining sequences to about 0.1% of total sequencea
+Below is the detail process of the methodology:
+1.	Data pre-processed.
+Raw reads obtained from total RNA-seq were processed based on the quality of bases first. After quality control, the paired sequences were combined as a reads pool with reverse sequences labeled as 2nd file.
+Reference microRNA was obtained from miRbase. Both mature sequences and pre-mature sequences were used in this study. Miriad database was used to identify the types of microRNAs.
+
+In this step, a combined FASTA file will be generated for each sample.
+
+2.	Filter sequences don’t belong to microRNAs.
+
+Vsearch was used to filter sequences won’t be able to be microRNAs in high efficiency following the command as below:
+“vsearch --usearch_global ${i}.fa --db pwd/reference/hairpin_hsa_t.fa --id 0.20 --otutabout ${i}_b20.txt --blast6out ${i}_b20.blast --mincols 15 --matched ${i}_b20”
+
+In this command, pre-mature microRNAs’ sequences were used as references. Each raw read from total RNA seq was blasted to the reference. Sequences with lower identity less than 20%, and lower-mdiscardedd bases less than 15 were discarded. For the remaining sequences, choose the highest identity result as annotations. Three files were generated from this step: the primary profile of pre-mature microRNAs in text format, the blast result in blast-like tab-separated format and remained sequence in FASTA format. 
+
+3.	Check sequences with k-mer
+Based on the result from step 3, sequences were checked with k-mers. In this step, both raw reads and reference pre-mature microRNA sequences were split into k-mers with the length of mature microRNAs respectively with step length 1. Then compare the k-mer sequences from raw reads and reference sequences. 
+An example of 7mer sequence with step length 1:
+Raw reads: ATGCGCATATCG
+7mer read: ATGCGCA
+           TGCGCAT
+            GCGCATA
+            ……
+
+The sequences were identity as pre-microRNAs by following two criteria:
+1.	At least 3 k-mer sequences from raw reads were observed involving the k-mers from references.
+2.	3 k-mers are sequential or there is only one gap among 3 k-mer sequences.
+
+After checking each sample, the final profile of each sample was obtained. All matrix from this step were combined.
+
