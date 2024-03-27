@@ -3,6 +3,7 @@ pre-requirement of software and files:
 1. vsearch
 2. pre-microRNA reference sequences in FASTA file
 3. mature microRNA reference sequences in FASTA file.
+4. python3 or above
    
 FIrstly, preprocess rawdata with quality control for rawdata.
 Secondely, go through "main_concept" file and perform sequence filter following the instruction.
